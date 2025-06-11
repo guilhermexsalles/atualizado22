@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import '../App.css';
 
-// Menu reutilizável com estilo fixo
+// Menu reutilizável
 function Menu() {
   return (
     <nav>
@@ -19,13 +19,18 @@ export default function Saidas() {
   const [descricao, setDescricao] = useState("");
   const [valor, setValor] = useState("");
 
+  // Detecta se está em ambiente local ou produção
+  const baseURL = import.meta.env.DEV
+    ? 'http://localhost:3000'
+    : import.meta.env.VITE_API_URL;
+
   const carregarSaidas = () => {
-    axios.get("http://localhost:3000/api/transacoes")
+    axios.get(`${baseURL}/api/transacoes`)
       .then((res) => {
         const saidasFiltradas = res.data.filter((t) => t.tipo === 'saida');
         setSaidas(saidasFiltradas);
       })
-      .catch((err) => console.error("Erro ao carregar saídas:", err));
+      .catch((err) => console.error("Erro ao carregar saídas:", err.message));
   };
 
   useEffect(() => {
@@ -35,20 +40,26 @@ export default function Saidas() {
   const adicionarSaida = () => {
     if (!descricao || !valor) return;
 
-    const nova = { descricao, valor: parseFloat(valor), tipo: "saida", data: new Date().toISOString().slice(0, 10) };
-    axios.post("http://localhost:3000/api/transacoes", nova)
+    const nova = {
+      descricao,
+      valor: parseFloat(valor),
+      tipo: "saida",
+      data: new Date().toISOString().slice(0, 10)
+    };
+
+    axios.post(`${baseURL}/api/transacoes`, nova)
       .then(() => {
         carregarSaidas();
         setDescricao("");
         setValor("");
       })
-      .catch((err) => console.error("Erro ao adicionar saída:", err));
+      .catch((err) => console.error("Erro ao adicionar saída:", err.message));
   };
 
   const removerSaida = (id) => {
-    axios.delete(`http://localhost:3000/api/transacoes/${id}`)
+    axios.delete(`${baseURL}/api/transacoes/${id}`)
       .then(() => carregarSaidas())
-      .catch((err) => console.error("Erro ao remover saída:", err));
+      .catch((err) => console.error("Erro ao remover saída:", err.message));
   };
 
   return (

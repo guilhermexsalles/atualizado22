@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import '../App.css';
 
-// Menu de navegação estilizado (sem inline)
+// Menu de navegação estilizado
 function Menu() {
   return (
     <nav>
@@ -19,10 +19,15 @@ export default function Entradas() {
   const [descricao, setDescricao] = useState("");
   const [valor, setValor] = useState("");
 
+  // Detecta URL correta (local ou produção)
+  const baseURL = import.meta.env.DEV
+    ? 'http://localhost:3000'
+    : import.meta.env.VITE_API_URL;
+
   // Carrega apenas as transações do tipo 'entrada'
   const carregarEntradas = () => {
     axios
-      .get("http://localhost:3000/api/transacoes")
+      .get(`${baseURL}/api/transacoes`)
       .then((res) => {
         const entradasFiltradas = res.data.filter(
           (t) => t.tipo === "entrada"
@@ -49,7 +54,7 @@ export default function Entradas() {
     };
 
     axios
-      .post("http://localhost:3000/api/transacoes", nova)
+      .post(`${baseURL}/api/transacoes`, nova)
       .then(() => {
         carregarEntradas();
         setDescricao("");
@@ -62,7 +67,7 @@ export default function Entradas() {
 
   const removerEntrada = (id) => {
     axios
-      .delete(`http://localhost:3000/api/transacoes/${id}`)
+      .delete(`${baseURL}/api/transacoes/${id}`)
       .then(() => carregarEntradas())
       .catch((err) =>
         console.error("Erro ao remover entrada:", err.message)
@@ -75,7 +80,6 @@ export default function Entradas() {
 
       <h1>Entradas</h1>
 
-      {/* Formulário com visual melhorado */}
       <div className="card">
         <input
           placeholder="Descrição"
@@ -91,7 +95,6 @@ export default function Entradas() {
         <button onClick={adicionarEntrada}>Adicionar</button>
       </div>
 
-      {/* Lista de entradas */}
       <div className="card">
         <ul>
           {entradas.map((e) => (
